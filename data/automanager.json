@@ -1,0 +1,22 @@
+{
+  "settings": [
+    {
+      "id": "set_1",
+      "business_id": "biz_loja_principal",
+      "business_name": "Will Souza",
+      "document": "666.666.666-69",
+      "phone": "35 8431-5223",
+      "address": "Avenida dos Baitolas número 24",
+      "opening_balance": 0,
+      "currency": "BRL",
+      "created_at": "2026-01-01T08:00:00.000Z",
+      "updated_at": "2026-10-28T23:26:42.374Z"
+    }
+  ],
+  "clients": [],
+  "vehicles": [],
+  "appointments": [],
+  "transactions": [],
+  "payments": [],
+  "version": 1
+}

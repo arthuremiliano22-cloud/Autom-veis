@@ -1,0 +1,6 @@
+{
+  "name": "AutoGestor — Gestão e Agenda Automotiva",
+  "description": "SaaS de gestão financeira, agenda de serviços, controle de clientes e veículos para lojas de carros e oficinas automotivas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
