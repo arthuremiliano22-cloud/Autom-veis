@@ -1,0 +1,148 @@
+{
+  "entities": {
+    "Client": {
+      "title": "Client",
+      "description": "Client profile containing contact info and notes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "business_id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 150 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "created_at": { "type": "string", "maxLength": 50 },
+        "updated_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "business_id", "name", "created_at", "updated_at"]
+    },
+    "Vehicle": {
+      "title": "Vehicle",
+      "description": "Vehicle details linked to a client",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "business_id": { "type": "string", "maxLength": 128 },
+        "client_id": { "type": "string", "maxLength": 128 },
+        "plate": { "type": "string", "maxLength": 20 },
+        "model": { "type": "string", "maxLength": 150 },
+        "year": { "type": "string", "maxLength": 10 },
+        "color": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "created_at": { "type": "string", "maxLength": 50 },
+        "updated_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "business_id", "client_id", "plate", "model", "created_at", "updated_at"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Service scheduling linked to client and vehicle",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "business_id": { "type": "string", "maxLength": 128 },
+        "client_id": { "type": "string", "maxLength": 128 },
+        "vehicle_id": { "type": "string", "maxLength": 128 },
+        "scheduled_at": { "type": "string", "maxLength": 50 },
+        "service_name": { "type": "string", "maxLength": 250 },
+        "observations": { "type": "string", "maxLength": 2000 },
+        "status": {
+          "type": "string",
+          "enum": ["agendado", "confirmado", "em_andamento", "concluido", "cancelado"]
+        },
+        "estimated_amount": { "type": "number" },
+        "final_amount": { "type": "number" },
+        "created_at": { "type": "string", "maxLength": 50 },
+        "updated_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "business_id", "client_id", "vehicle_id", "scheduled_at", "service_name", "status", "created_at", "updated_at"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial income or expense transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "business_id": { "type": "string", "maxLength": 128 },
+        "appointment_id": { "type": "string", "maxLength": 128 },
+        "client_id": { "type": "string", "maxLength": 128 },
+        "vehicle_id": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "description": { "type": "string", "maxLength": 250 },
+        "category": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "paid_amount": { "type": "number" },
+        "due_date": { "type": "string", "maxLength": 50 },
+        "status": {
+          "type": "string",
+          "enum": ["pendente", "parcial", "pago", "vencido", "cancelado"]
+        },
+        "payment_method": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "created_at": { "type": "string", "maxLength": 50 },
+        "updated_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "business_id", "type", "description", "category", "amount", "status", "created_at", "updated_at"]
+    },
+    "TransactionPayment": {
+      "title": "TransactionPayment",
+      "description": "Payment installment made towards a transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "business_id": { "type": "string", "maxLength": 128 },
+        "transaction_id": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "paid_at": { "type": "string", "maxLength": 50 },
+        "payment_method": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "created_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "business_id", "transaction_id", "amount", "paid_at", "created_at"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Store configuration and baseline financials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "business_id": { "type": "string", "maxLength": 128 },
+        "business_name": { "type": "string", "maxLength": 150 },
+        "document": { "type": "string", "maxLength": 50 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "address": { "type": "string", "maxLength": 250 },
+        "opening_balance": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "created_at": { "type": "string", "maxLength": 50 },
+        "updated_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "business_id", "business_name", "created_at", "updated_at"]
+    }
+  },
+  "firestore": {
+    "/clients/{clientId}": {
+      "schema": { "$ref": "#/entities/Client" },
+      "description": "Customer contact registry"
+    },
+    "/vehicles/{vehicleId}": {
+      "schema": { "$ref": "#/entities/Vehicle" },
+      "description": "Vehicle garage registered under clients"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": { "$ref": "#/entities/Appointment" },
+      "description": "Workshop and store appointments"
+    },
+    "/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Financial ledger transactions"
+    },
+    "/transactions/{transactionId}/payments/{paymentId}": {
+      "schema": { "$ref": "#/entities/TransactionPayment" },
+      "description": "Payment records for a transaction"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "Application and store settings"
+    }
+  }
+}

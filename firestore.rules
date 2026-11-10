@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Connection health check
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // Clients registry
+    match /clients/{clientId} {
+      allow read: if true;
+      allow create, update: if isValidId(clientId) && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 200;
+      allow delete: if isValidId(clientId);
+    }
+
+    // Vehicles registry
+    match /vehicles/{vehicleId} {
+      allow read: if true;
+      allow create, update: if isValidId(vehicleId) && request.resource.data.plate is string && request.resource.data.plate.size() > 0 && request.resource.data.plate.size() <= 20;
+      allow delete: if isValidId(vehicleId);
+    }
+
+    // Appointments & service schedule
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create, update: if isValidId(appointmentId) && request.resource.data.service_name is string && request.resource.data.service_name.size() > 0 && request.resource.data.service_name.size() <= 250;
+      allow delete: if isValidId(appointmentId);
+    }
+
+    // Financial ledger transactions
+    match /transactions/{transactionId} {
+      allow read: if true;
+      allow create, update: if isValidId(transactionId) && request.resource.data.description is string && request.resource.data.amount is number;
+      allow delete: if isValidId(transactionId);
+
+      // Subcollection payments
+      match /payments/{paymentId} {
+        allow read: if true;
+        allow create, update: if isValidId(paymentId) && request.resource.data.amount is number;
+        allow delete: if isValidId(paymentId);
+      }
+    }
+
+    // Store settings & opening balance
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isValidId(settingId);
+    }
+  }
+}
