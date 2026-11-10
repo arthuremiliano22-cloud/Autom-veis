@@ -35,6 +35,27 @@ function generateId(): string {
   return 'id_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
 }
 
+function stripUndefined<T extends Record<string, any>>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  const cleaned: Record<string, any> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (val !== undefined) {
+      if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+        cleaned[key] = stripUndefined(val);
+      } else {
+        cleaned[key] = val;
+      }
+    }
+  }
+  return cleaned as T;
+}
+
+function safeSetDoc<T extends Record<string, any>>(docRef: any, data: T, options?: any) {
+  return setDoc(docRef, stripUndefined(data), options);
+}
+
 export const firestoreApi = {
   // --- Settings ---
   async getSettings(): Promise<StoreSettings> {
@@ -58,7 +79,7 @@ export const firestoreApi = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      await setDoc(docRef, defaultSettings);
+      await safeSetDoc(docRef, defaultSettings);
       return defaultSettings;
     } catch (err) {
       handleFirestoreError(err, OperationType.GET, path);
@@ -74,7 +95,7 @@ export const firestoreApi = {
         ...data,
         updated_at: new Date().toISOString(),
       };
-      await setDoc(doc(db, path, 'store_config'), updated);
+      await safeSetDoc(doc(db, path, 'store_config'), updated);
       return updated;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
@@ -177,7 +198,7 @@ export const firestoreApi = {
         updated_at: now,
       };
 
-      await setDoc(doc(db, 'clients', clientId), newClient);
+      await safeSetDoc(doc(db, 'clients', clientId), newClient);
 
       // If initial vehicle provided, create vehicle
       if (data.vehiclePlate?.trim() && data.vehicleModel?.trim()) {
@@ -193,7 +214,7 @@ export const firestoreApi = {
           created_at: now,
           updated_at: now,
         };
-        await setDoc(doc(db, 'vehicles', vehicleId), newVehicle);
+        await safeSetDoc(doc(db, 'vehicles', vehicleId), newVehicle);
         newClient.vehicles = [newVehicle];
       } else {
         newClient.vehicles = [];
@@ -219,7 +240,7 @@ export const firestoreApi = {
         ...data,
         updated_at: new Date().toISOString(),
       };
-      await setDoc(docRef, updated);
+      await safeSetDoc(docRef, updated);
       return updated;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
@@ -343,7 +364,7 @@ export const firestoreApi = {
         updated_at: now,
       };
 
-      await setDoc(doc(db, 'vehicles', vehicleId), newVehicle);
+      await safeSetDoc(doc(db, 'vehicles', vehicleId), newVehicle);
 
       const clientDoc = await getDoc(doc(db, 'clients', data.client_id));
       if (clientDoc.exists()) {
@@ -371,7 +392,7 @@ export const firestoreApi = {
         plate: data.plate ? data.plate.trim().toUpperCase().replace(/[^A-Z0-9]/g, '') : existing.plate,
         updated_at: new Date().toISOString(),
       };
-      await setDoc(docRef, updated);
+      await safeSetDoc(docRef, updated);
       return updated;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
@@ -499,7 +520,7 @@ export const firestoreApi = {
         updated_at: now,
       };
 
-      await setDoc(doc(db, 'appointments', appointmentId), newAppointment);
+      await safeSetDoc(doc(db, 'appointments', appointmentId), newAppointment);
       return this.getAppointmentById(appointmentId);
     } catch (err) {
       handleFirestoreError(err, OperationType.CREATE, path);
@@ -520,7 +541,7 @@ export const firestoreApi = {
         ...data,
         updated_at: new Date().toISOString(),
       };
-      await setDoc(docRef, updated);
+      await safeSetDoc(docRef, updated);
       return this.getAppointmentById(id);
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
@@ -559,7 +580,7 @@ export const firestoreApi = {
         final_amount: data.final_amount,
         updated_at: now,
       };
-      await setDoc(doc(db, 'appointments', id), updatedApt);
+      await safeSetDoc(doc(db, 'appointments', id), updatedApt);
 
       // Create linked financial transaction if requested
       if (data.create_transaction) {
@@ -589,7 +610,7 @@ export const firestoreApi = {
           updated_at: now,
         };
 
-        await setDoc(doc(db, 'transactions', txId), newTx);
+        await safeSetDoc(doc(db, 'transactions', txId), newTx);
 
         if (isPaid) {
           const payId = generateId();
@@ -603,7 +624,7 @@ export const firestoreApi = {
             notes: 'Pagamento total na conclusão do serviço',
             created_at: now,
           };
-          await setDoc(doc(db, 'transactions', txId, 'payments', payId), paymentRecord);
+          await safeSetDoc(doc(db, 'transactions', txId, 'payments', payId), paymentRecord);
         }
       }
 
@@ -771,7 +792,7 @@ export const firestoreApi = {
         updated_at: now,
       };
 
-      await setDoc(doc(db, 'transactions', txId), newTx);
+      await safeSetDoc(doc(db, 'transactions', txId), newTx);
 
       if (data.immediate_payment && data.immediate_payment.amount > 0) {
         const payId = generateId();
@@ -785,7 +806,7 @@ export const firestoreApi = {
           notes: data.immediate_payment.notes || 'Pagamento imediato registrado na criação',
           created_at: now,
         };
-        await setDoc(doc(db, 'transactions', txId, 'payments', payId), paymentRecord);
+        await safeSetDoc(doc(db, 'transactions', txId, 'payments', payId), paymentRecord);
         newTx.payments = [paymentRecord];
       }
 
@@ -809,7 +830,7 @@ export const firestoreApi = {
         ...data,
         updated_at: new Date().toISOString(),
       };
-      await setDoc(docRef, updated);
+      await safeSetDoc(docRef, updated);
       return updated;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, path);
@@ -876,7 +897,7 @@ export const firestoreApi = {
         created_at: now,
       };
 
-      await setDoc(doc(db, 'transactions', transactionId, 'payments', payId), paymentRecord);
+      await safeSetDoc(doc(db, 'transactions', transactionId, 'payments', payId), paymentRecord);
 
       // Recalculate total paid
       const allPaymentsSnap = await getDocs(collection(db, 'transactions', transactionId, 'payments'));
@@ -896,7 +917,7 @@ export const firestoreApi = {
         payment_method: data.payment_method || tx.payment_method,
         updated_at: now,
       };
-      await setDoc(txDocRef, updatedTx);
+      await safeSetDoc(txDocRef, updatedTx);
 
       return {
         payment: paymentRecord,
@@ -1088,22 +1109,22 @@ export const firestoreApi = {
 
       if (Array.isArray(data.data.clients)) {
         for (const c of data.data.clients) {
-          batch.set(doc(db, 'clients', c.id), c);
+          batch.set(doc(db, 'clients', c.id), stripUndefined(c));
         }
       }
       if (Array.isArray(data.data.vehicles)) {
         for (const v of data.data.vehicles) {
-          batch.set(doc(db, 'vehicles', v.id), v);
+          batch.set(doc(db, 'vehicles', v.id), stripUndefined(v));
         }
       }
       if (Array.isArray(data.data.appointments)) {
         for (const a of data.data.appointments) {
-          batch.set(doc(db, 'appointments', a.id), a);
+          batch.set(doc(db, 'appointments', a.id), stripUndefined(a));
         }
       }
       if (Array.isArray(data.data.transactions)) {
         for (const t of data.data.transactions) {
-          batch.set(doc(db, 'transactions', t.id), t);
+          batch.set(doc(db, 'transactions', t.id), stripUndefined(t));
         }
       }
 

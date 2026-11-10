@@ -151,6 +151,18 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
+  // Global Shortcut: Ctrl+K or Cmd+K to open/toggle Quick Search
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsQuickSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   // Appointment Helpers
   const handleOpenNewAppointment = (date?: string, clientId?: string, vehicleId?: string) => {
     setEditingAppointment(null);

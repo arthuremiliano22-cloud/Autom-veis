@@ -41,17 +41,13 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        if (isOpen) onClose();
-      }
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [onClose]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -93,20 +89,33 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
             placeholder="Buscar por placa (ex: BRA2E19), nome do cliente, veículo ou serviço..."
             className="w-full text-base bg-transparent border-none outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
           />
-          {loading ? (
+          {loading && (
             <Loader2 className="w-5 h-5 text-slate-400 animate-spin shrink-0" />
-          ) : query ? (
-            <button
-              onClick={() => setQuery('')}
-              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          ) : (
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-xs text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+          )}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title="Limpar texto"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[11px] text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
               ESC
             </kbd>
-          )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Fechar pesquisa (Esc)"
+              aria-label="Fechar pesquisa"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Results Area */}
